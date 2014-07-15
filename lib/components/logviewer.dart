@@ -8,7 +8,10 @@ import './logviewer_controller.dart';
 
 @CustomTag('log-viewer')
 class LogViewer extends PolymerElement  {
+  // TODO: allow arbitrary CSS units
+  /// Available width for the log viewer in pixels.
   @published int windowWidth = 500;
+  /// Available height for the log viewer in pixels.
   @published int windowHeight = 350;
   @observable List<LogRecord> messages = toObservable(new List<LogRecord>());
   @observable List<Filter> filters = toObservable(new List<Filter>());
@@ -18,8 +21,31 @@ class LogViewer extends PolymerElement  {
   LogViewer.created() : super.created() {
     this.controller = new LogViewerController(this);
     this.changes.listen((change) {
+      Timer.run(() => this.recalculateMessageHeight());
       this.controller.logMayHaveChanged();
     });
+    Timer.run(() => this.recalculateMessageHeight());
+  }
+  
+  @observable get filterDisplay {
+    if (filters.isEmpty) {
+      return "hidden";
+    }
+    return "block";
+  }
+  
+  @observable int logMessageHeight;
+  
+  void recalculateMessageHeight() {
+    // 40px is probably enough for the header, but we can be more precise.
+    var height = windowHeight - 40;
+    if (shadowRoot != null) {
+      var header = shadowRoot.querySelector('#header');
+      if (header != null) {
+        height = windowHeight - header.clientHeight - 5;
+      }
+    }
+    logMessageHeight = height;
   }
 
   // This is mainly a hack for testing. Instead of the controller directly
@@ -35,6 +61,7 @@ class LogViewer extends PolymerElement  {
       return;
     }
 
+    recalculateMessageHeight();
     var log = shadowRoot.querySelector("#logMessages");
     
     // We want to keep the person scrolled to the bottom, but only if they're

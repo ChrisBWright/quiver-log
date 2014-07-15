@@ -23,15 +23,16 @@ import 'package:polymer/polymer.dart';
 class LogPopup extends PolymerElement {
   /** The name of the log to listen to. Attribute. */
   @published String log = "";
-  /** The width of the popped-out window, using standard CSS-style units. Attribute. */
-  @published String windowWidth = "500px";
-  /** The height of the popped-out window, using standard CSS-style units. Attribute. */
-  @published String windowHeight = "350px";
+  /** The width of the popped-out window in pixels. Attribute. */
+  @published int windowWidth = 500;
+  /** The height of the popped-out window in pixels. Attribute. */
+  @published int windowHeight = 350;
   @observable bool expanded = false;
   @observable String logDisplay;
   @observable String title;
   @observable String windowPosition = "auto";
   @observable String buttonBottomRadius = '0.2em';
+  @observable String toggleButtonWidth = "auto";
   String name;
 
   LogPopup.created() : super.created() {
@@ -45,6 +46,8 @@ class LogPopup extends PolymerElement {
   
   void toggle() {
     expanded = !expanded;
+    windowWidth = windowWidth;
+    windowHeight = windowHeight;
     _display();
   }
 
@@ -52,10 +55,13 @@ class LogPopup extends PolymerElement {
     if (expanded) {
       logDisplay = "block";
       title = "[-] $name";
+      // -8px to account for a 4px border on each side.
+      toggleButtonWidth = "${windowWidth - 8}px";
       buttonBottomRadius = '0em';
     } else {
       logDisplay = "none";
       title = "[+] $name";
+      toggleButtonWidth = "auto";
       // Curved button corners are important.
       buttonBottomRadius = '0.2em';
     }
